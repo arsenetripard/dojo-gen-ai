@@ -4,6 +4,7 @@ from audio_recorder_streamlit import audio_recorder
 
 from src.utils.get_transcription import get_transcription
 from src.utils.get_answer import get_answer
+from src.utils.generate_chunks import generate_chunks
 
 st.header("AI Note Taker 🤖")
 st.write("Welcome to the AI Note Taker! 🎉")
@@ -22,10 +23,16 @@ if audio_bytes:
 
     question = st.text_input(label="Question", placeholder="Enter a question please")
     if question:
-        message = f"""
-        Context: {transcription},
-        Question: {question}
-        Answer:
-        """
-        answer = get_answer(message)
+        answers = []
+        for chunk in generate_chunks(transcription):
+            message = f"""
+                Context: {chunk},
+                Question: {question}
+                If the answer is not in the context above, please answer with empty string "".
+                Answer:
+            """
+            answers.append(get_answer(message))
+
+        # Join the answers into a single string
+        answer = " ".join(answers)
         st.write(answer)
