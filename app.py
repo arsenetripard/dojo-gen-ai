@@ -11,6 +11,9 @@ from src.utils.initialise_vector_store import initialise_vector_store
 st.header("AI Note Taker 🤖")
 st.write("Welcome to the AI Note Taker! 🎉")
 
+if "message_history" not in st.session_state:
+    st.session_state["message_history"] = ""
+
 AUDIO_PATH = Path("audio.wav")
 COLLECTION_NAME = "ai_notetaker"
 
@@ -45,8 +48,14 @@ if audio_bytes:
             message += f"Context: {result} \n"
         message += f"""
                 Question: {question}
-                If the answer is not in the context above, please answer with empty string.
+                You are a helpful assistant. You will be given a context and a discussion. Answer only using this information.
+                If you can't find the answer, please say "I don't know".
                 Answer:
             """
-        answer = get_answer(message)
+
+        st.session_state["message_history"] += f"\n\n {message}"
+
+        answer = get_answer(st.session_state["message_history"])
+        st.session_state["message_history"] += answer
+
         st.write(answer)
